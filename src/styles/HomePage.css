@@ -1,0 +1,144 @@
+.homepage-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem 2rem 2rem;
+  background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+  min-height: 60vh;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-content {
+  max-width: 420px;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.brand {
+  color: #6366f1;
+  font-weight: 700;
+}
+
+.hero-content p {
+  color: #475569;
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #6366f1 60%, #60a5fa 100%);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #4338ca 60%, #2563eb 100%);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-secondary:hover {
+  background: #6366f1;
+  color: #fff;
+}
+
+.hero-image img {
+  width: 320px;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+}
+
+.features-section {
+  padding: 3rem 1rem 2rem 1rem;
+  background: #fff;
+  text-align: center;
+}
+
+.features-section h2 {
+  font-size: 2rem;
+  color: #1e293b;
+  margin-bottom: 2rem;
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.feature-card {
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 1.5rem 1.2rem;
+  width: 220px;
+  box-shadow: 0 2px 12px rgba(99,102,241,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-card span {
+  font-size: 2.2rem;
+  margin-bottom: 0.7rem;
+}
+
+.feature-card h3 {
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  color: #475569;
+  font-size: 1rem;
+}
+
+.about-section {
+  padding: 2.5rem 1rem;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.about-section h2 {
+  color: #1e293b;
+  font-size: 1.7rem;
+  margin-bottom: 1rem;
+}
+
+.about-section p {
+  color: #475569;
+  font-size: 1.08rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.homepage-footer {
+  background: #6366f1;
+  color: #fff;
+  text-align: center;
+  padding: 1.1rem 0;
+  font-size: 1rem;
+  margin-top: 0;
+}

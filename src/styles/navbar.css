@@ -1,0 +1,120 @@
+/* navbar.css */
+
+.navbar {
+  width: 100%;
+  background: #fff;
+  position: fixed;     /* Fixed to top */
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 0.5rem 0;
+}
+
+.navbar-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-icon {
+  width: 2.5em;
+  height: 2.5em;
+  background: #646cff22;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #646cff;
+}
+
+.brand-name {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: #222;
+  letter-spacing: 1px;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+}
+
+.navbar-link {
+  color: #444;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar-link:hover,
+.admin-link:hover {
+  color: #646cff;
+}
+
+.admin-link {
+  color: #e67e22;
+}
+
+.navbar-help {
+  margin-left: 1rem;
+}
+
+.help-button {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  background: #646cff;
+  color: #fff;
+  border: none;
+  border-radius: 2em;
+  padding: 0.5em 1em;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.help-button:hover {
+  background: #4b50c9;
+}
+
+.help-icon {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.help-text {
+  font-size: 1em;
+}
+
+/* Responsive: Stack menu on small screens */
+@media (max-width: 700px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 1rem;
+  }
+  .navbar-menu {
+    justify-content: center;
+    gap: 1rem;
+    margin: 0.5em 0;
+  }
+  .navbar-help {
+    align-self: flex-end;
+    margin: 0.5em 0 0 0;
+  }
+}

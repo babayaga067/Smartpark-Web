@@ -1,0 +1,120 @@
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+}
+
+/* Centering Container */
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Registration Card */
+.register-box {
+   display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  padding: 30px 35px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  animation: slideIn 0.4s ease;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Title & Subtitle */
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+  color: #222;
+}
+
+.register-box p {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Input Fields */
+.register-box label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.register-box input[type="text"],
+.register-box input[type="email"],
+.register-box input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border 0.2s ease;
+}
+
+.register-box input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Show Password Checkbox */
+.options {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 20px;
+  gap: 6px;
+}
+
+.options input[type="checkbox"] {
+  accent-color: #007bff;
+  cursor: pointer;
+}
+
+/* Register Button */
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
