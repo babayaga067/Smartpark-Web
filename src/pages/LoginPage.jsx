@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/LoginPage.css';
+import '../styles/LoginPage.css'; // Your CSS path
 import Navbar from '../components/Navbar.jsx';
+import AuthService from '../../Services/AuthService.js'; // Your backend service
 
 const LoginPage = () => {
   const [isAdmin, setIsAdmin] = useState(true);
@@ -14,32 +15,36 @@ const LoginPage = () => {
     setIsAdmin(!isAdmin);
     setShowPassword(false);
     setError('');
+    setForm({ email: '', password: '' });
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (isAdmin) {
-      // Demo admin credentials
+      // Admin login is hardcoded for now
       if (form.email === 'admin@smartpark.com' && form.password === 'admin123') {
-        navigate('/dashboard');
+        navigate('/dashboard'); // admin dashboard route
       } else {
         setError('Invalid admin credentials');
       }
     } else {
-      // Check user credentials from localStorage
-      const user = JSON.parse(localStorage.getItem('smartpark_user'));
-      if (
-        user &&
-        form.email === user.email &&
-        form.password === user.password
-      ) {
-        navigate('/dashboard');
-      } else {
-        setError('Invalid user credentials');
+      // User login via backend API
+      try {
+        const response = await AuthService.login(form);
+        if (response.success) {
+          // Redirect to user dashboard and pass user info
+          navigate('/Dashboard', { state: { user: response.data.user } });
+        } else {
+          setError(response.message || 'Login failed');
+        }
+      } catch (err) {
+        setError(err.message || 'Login failed');
       }
     }
   };
@@ -47,7 +52,7 @@ const LoginPage = () => {
   return (
     <>
       <Navbar />
-      <div className="login-container">
+      <div className="login-wrapper">
         <div className="login-box fade-in">
           <h2>{isAdmin ? 'Admin Login' : 'User Login'}</h2>
           <p>
@@ -55,15 +60,14 @@ const LoginPage = () => {
               ? 'Enter your credentials to access the admin dashboard'
               : 'Sign in to your user account to manage parking'}
           </p>
-          {error && (
-            <div style={{ color: 'red', marginBottom: '1rem', fontSize: '1rem' }}>
-              {error}
-            </div>
-          )}
+
+          {error && <div className="error-message">{error}</div>}
+
           <form onSubmit={handleLogin}>
-            <label>Email</label>
+            <label htmlFor="email">Email</label>
             <input
               type="email"
+              id="email"
               name="email"
               placeholder={isAdmin ? 'admin@smartpark.com' : 'user@example.com'}
               value={form.email}
@@ -71,9 +75,10 @@ const LoginPage = () => {
               required
             />
 
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input
               type={showPassword ? 'text' : 'password'}
+              id="password"
               name="password"
               placeholder="••••••••"
               value={form.password}
@@ -90,7 +95,9 @@ const LoginPage = () => {
                 />
                 Show Password
               </label>
-              <a href="#">Forgot password?</a>
+              <a href="#" onClick={(e) => e.preventDefault()}>
+                Forgot password?
+              </a>
             </div>
 
             <button type="submit" className="btn-primary">
@@ -102,10 +109,7 @@ const LoginPage = () => {
             <button onClick={toggleUserType} className="switch-btn">
               {isAdmin ? 'Switch to User Login' : 'Switch to Admin Login'}
             </button>
-            <button
-              className="register-btn"
-              onClick={() => navigate('/register')}
-            >
+            <button className="register-btn" onClick={() => navigate('/register')}>
               Register Now
             </button>
           </div>
