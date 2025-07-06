@@ -1,7 +1,19 @@
+// step 1: import necessary modules and models
+// step 2: function registercontroller or function logincontroller
+// step 3: import data inputs from body
+// step 4: check if user already exists or validates
+// step 5: create new user if not exists
+// Step 6: password encreption and validation
+// step 7: insert to database
+// step 8: generate token and send response
+// step 9: export functions for use in routes 
+
+
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import { Op } from 'sequelize';
+
 
 const JWT_SECRET = process.env.JWT_SECRET || 'privateKey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
