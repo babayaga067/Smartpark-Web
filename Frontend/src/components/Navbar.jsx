@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Car, Menu, X, User, LogOut, Settings, BarChart3 } from 'lucide-react';
+import { Car, Menu, X, User, LogOut, Settings as SettingsIcon, BarChart3, Bell, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -33,6 +33,16 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Link
+                  to="/about"
+                  className={`transition-colors ${
+                    isActive("/about")
+                      ? "text-blue-600"
+                      : "text-gray-700 hover:text-blue-600"
+                  }`}
+                >
+                  About
+                </Link>
+                <Link
                   to={isAdmin ? "/admin/dashboard" : "/dashboard"}
                   className={`transition-colors ${
                     isActive(isAdmin ? "/admin/dashboard" : "/dashboard")
@@ -56,6 +66,16 @@ const Navbar = () => {
                       Parking Places
                     </Link>
                     <Link
+                      to="/quick-book"
+                      className={`transition-colors ${
+                        isActive("/quick-book")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Quick Book
+                    </Link>
+                    <Link
                       to="/booking-history"
                       className={`transition-colors ${
                         isActive("/booking-history")
@@ -65,20 +85,63 @@ const Navbar = () => {
                     >
                       My Bookings
                     </Link>
+                    <Link
+                      to="/notifications"
+                      className={`transition-colors ${
+                        isActive("/notifications")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      <Bell className="h-4 w-4 inline mr-1" />
+                      Notifications
+                    </Link>
                   </>
                 )}
 
                 {isAdmin && (
-                  <Link
-                    to="/admin/places"
-                    className={`transition-colors ${
-                      isActive("/admin/places")
-                        ? "text-blue-600"
-                        : "text-gray-700 hover:text-blue-600"
-                    }`}
-                  >
-                    Manage Places
-                  </Link>
+                  <>
+                    <Link
+                      to="/admin/places"
+                      className={`transition-colors ${
+                        isActive("/admin/places")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Manage Places
+                    </Link>
+                    <Link
+                      to="/admin/users"
+                      className={`transition-colors ${
+                        isActive("/admin/users")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Users
+                    </Link>
+                    <Link
+                      to="/admin/reports"
+                      className={`transition-colors ${
+                        isActive("/admin/reports")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Reports
+                    </Link>
+                    <Link
+                      to="/admin/bookings"
+                      className={`transition-colors ${
+                        isActive("/admin/bookings")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Manage Bookings
+                    </Link>
+                  </>
                 )}
 
                 {/* User Menu */}
@@ -94,12 +157,28 @@ const Navbar = () => {
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                       <Link
+                        to="/notifications"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Bell className="h-4 w-4 mr-2" />
+                        Notifications
+                      </Link>
+                      <Link
                         to="/profile"
                         onClick={() => setShowUserMenu(false)}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        <Settings className="h-4 w-4 mr-2" />
+                        <User className="h-4 w-4 mr-2" />
                         Profile Settings
+                      </Link>
+                      <Link
+                        to="/settings"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <SettingsIcon className="h-4 w-4 mr-2" />
+                        Settings
                       </Link>
                       <button
                         onClick={handleLogout}
@@ -114,6 +193,24 @@ const Navbar = () => {
               </>
             ) : (
               <>
+                <Link
+                  to="/about"
+                  className="text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/pricing"
+                  className="text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/help"
+                  className="text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  Help
+                </Link>
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-blue-600 transition-colors"
@@ -147,6 +244,13 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="space-y-2">
                 <Link
+                  to="/about"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  About
+                </Link>
+                <Link
                   to={isAdmin ? "/admin/dashboard" : "/dashboard"}
                   onClick={() => setIsOpen(false)}
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
@@ -170,17 +274,47 @@ const Navbar = () => {
                     >
                       My Bookings
                     </Link>
+                    <Link
+                      to="/notifications"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Notifications
+                    </Link>
                   </>
                 )}
 
                 {isAdmin && (
-                  <Link
-                    to="/admin/places"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Manage Places
-                  </Link>
+                  <>
+                    <Link
+                      to="/admin/places"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Manage Places
+                    </Link>
+                    <Link
+                      to="/admin/users"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Manage Users
+                    </Link>
+                    <Link
+                      to="/admin/reports"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Reports
+                    </Link>
+                    <Link
+                      to="/admin/bookings"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Manage Bookings
+                    </Link>
+                  </>
                 )}
 
                 <Link
@@ -189,6 +323,13 @@ const Navbar = () => {
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
                 >
                   Profile
+                </Link>
+                <Link
+                  to="/settings"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Settings
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -199,6 +340,27 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="space-y-2">
+                <Link
+                  to="/about"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/pricing"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/help"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Help
+                </Link>
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}

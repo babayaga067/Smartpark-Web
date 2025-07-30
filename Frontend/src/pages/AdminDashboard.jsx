@@ -3,6 +3,8 @@ import { Users, Car, DollarSign, BarChart3, MapPin, Calendar, TrendingUp, Clock 
 import { useParking } from '../context/ParkingContext';
 import { parkingService } from '../services/parkingService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../context/AuthContext';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const { places, fetchPlaces } = useParking();

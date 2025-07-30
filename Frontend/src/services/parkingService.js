@@ -27,6 +27,42 @@ let mockPlaces = [
     features: ['Valet', 'Car Wash', 'EV Charging'],
     coordinates: { lat: 40.7589, lng: -73.9851 },
     createdAt: new Date().toISOString()
+  },
+  {
+    id: '3',
+    name: 'Shopping Center Plaza',
+    address: '789 Mall Drive, Shopping District',
+    description: 'Convenient parking for shopping',
+    totalSlots: 200,
+    availableSlots: 120,
+    pricePerHour: 4.00,
+    features: ['Covered', 'Security', '24/7 Access'],
+    coordinates: { lat: 40.7505, lng: -73.9934 },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '4',
+    name: 'Airport Terminal Lot',
+    address: '321 Airport Blvd, Terminal Area',
+    description: 'Long-term airport parking',
+    totalSlots: 300,
+    availableSlots: 85,
+    pricePerHour: 6.00,
+    features: ['Shuttle Service', 'Security', 'Covered'],
+    coordinates: { lat: 40.6413, lng: -73.7781 },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '5',
+    name: 'University Campus Parking',
+    address: '555 College Ave, Campus District',
+    description: 'Student and visitor parking',
+    totalSlots: 180,
+    availableSlots: 95,
+    pricePerHour: 3.00,
+    features: ['Student Discount', 'EV Charging', 'Bike Racks'],
+    coordinates: { lat: 40.7282, lng: -73.9942 },
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -51,12 +87,57 @@ let mockSlots = [
   },
   {
     id: '3',
+    placeId: '1',
+    slotNumber: 'A-003',
+    type: 'ev',
+    isAvailable: true,
+    pricePerHour: 8.00,
+    features: ['EV Charging', 'Covered']
+  },
+  {
+    id: '4',
+    placeId: '1',
+    slotNumber: 'A-004',
+    type: 'regular',
+    isAvailable: true,
+    pricePerHour: 5.00,
+    features: ['Covered']
+  },
+  {
+    id: '5',
     placeId: '2',
     slotNumber: 'B-001',
     type: 'ev',
     isAvailable: true,
     pricePerHour: 10.00,
     features: ['EV Charging', 'Premium']
+  },
+  {
+    id: '6',
+    placeId: '2',
+    slotNumber: 'B-002',
+    type: 'premium',
+    isAvailable: false,
+    pricePerHour: 9.00,
+    features: ['Valet', 'Premium']
+  },
+  {
+    id: '7',
+    placeId: '3',
+    slotNumber: 'C-001',
+    type: 'regular',
+    isAvailable: true,
+    pricePerHour: 4.00,
+    features: ['Ground Floor']
+  },
+  {
+    id: '8',
+    placeId: '3',
+    slotNumber: 'C-002',
+    type: 'disabled',
+    isAvailable: true,
+    pricePerHour: 4.00,
+    features: ['Disabled Access', 'Near Entrance']
   }
 ];
 

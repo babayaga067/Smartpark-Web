@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Plus, Edit, Trash2, Car, DollarSign, ArrowLeft } from 'lucide-react';
 import { useParking } from '../../context/ParkingContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -9,6 +10,7 @@ const ManageSlots = () => {
   const { placeId } = useParams();
   const navigate = useNavigate();
   const { places, slots, fetchSlots, createSlot, updateSlot, deleteSlot, loading } = useParking();
+  const [place, setPlace] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingSlot, setEditingSlot] = useState(null);
   const [formData, setFormData] = useState({
@@ -20,7 +22,6 @@ const ManageSlots = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const place = places.find(p => p.id === placeId);
   const slotTypes = [
     { value: 'regular', label: 'Regular', icon: '🚗' },
     { value: 'premium', label: 'Premium', icon: '⭐' },
@@ -29,10 +30,17 @@ const ManageSlots = () => {
   const availableFeatures = ['Covered', 'Near Exit', 'Wide Space', 'Disabled Access', 'EV Charging'];
 
   useEffect(() => {
+    const loadData = async () => {
+      await fetchPlaces();
+      const foundPlace = places.find(p => p.id === placeId);
+      setPlace(foundPlace);
+    };
+    
     if (placeId) {
+      loadData();
       fetchSlots(placeId);
     }
-  }, [placeId]);
+  }, [placeId, places, fetchSlots]);
 
   const handleAddSlot = () => {
     setEditingSlot(null);
@@ -178,6 +186,13 @@ const ManageSlots = () => {
               <Plus className="h-4 w-4 mr-2" />
               Add New Slot
             </button>
+            <Link
+              to={`/admin/slots/${placeId}/create`}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Slot
+            </Link>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Edit, Trash2, Search, MapPin, DollarSign, Car } from 'lucide-react';
 import { useParking } from '../../context/ParkingContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -129,6 +130,13 @@ const ManagePlaces = () => {
               <Plus className="h-4 w-4 mr-2" />
               Add New Place
             </button>
+            <Link
+              to="/admin/places/create"
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Place
+            </Link>
           </div>
 
           {/* Search */}

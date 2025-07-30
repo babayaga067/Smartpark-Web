@@ -187,16 +187,74 @@ const Home = () => {
           <p className="text-xl mb-8 text-blue-100">
             Join thousands of satisfied customers using SmartPark today
           </p>
-          {!isAuthenticated && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {!isAuthenticated && (
+              <Link
+                to="/register"
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block"
+              >
+                Create Your Account
+              </Link>
+            )}
             <Link
-              to="/register"
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block"
+              to="/about"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 inline-block"
             >
-              Create Your Account
+              Learn More
             </Link>
-          )}
+          </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <Car className="h-8 w-8 text-blue-400" />
+                <span className="text-xl font-bold">SmartPark</span>
+              </div>
+              <p className="text-gray-400">
+                Making parking simple, smart, and accessible for everyone.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <div className="space-y-2">
+                <Link to="/about" className="block text-gray-400 hover:text-white transition-colors">About Us</Link>
+                <Link to="/pricing" className="block text-gray-400 hover:text-white transition-colors">Pricing</Link>
+                <Link to="/help" className="block text-gray-400 hover:text-white transition-colors">Help Center</Link>
+                <Link to="/contact" className="block text-gray-400 hover:text-white transition-colors">Contact</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Services</h3>
+              <div className="space-y-2">
+                <Link to="/parking-places" className="block text-gray-400 hover:text-white transition-colors">Find Parking</Link>
+                <Link to="/register" className="block text-gray-400 hover:text-white transition-colors">Sign Up</Link>
+                <Link to="/login" className="block text-gray-400 hover:text-white transition-colors">Login</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+              <div className="space-y-2 text-gray-400">
+                <p>123 Tech Street</p>
+                <p>Silicon Valley, CA 94105</p>
+                <p>+1 (555) 123-4567</p>
+                <p>support@smartpark.com</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 SmartPark. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

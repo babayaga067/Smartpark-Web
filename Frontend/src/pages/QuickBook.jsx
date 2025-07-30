@@ -4,14 +4,15 @@ import { MapPin, Clock, Calendar, Zap, Star } from 'lucide-react';
 import { useParking } from '../context/ParkingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-
 const QuickBook = () => {
   const navigate = useNavigate();
   const { places, fetchPlaces, createBooking, loading } = useParking();
+
   const [quickBookData, setQuickBookData] = useState({
     duration: '2', // hours
     startTime: 'now'
   });
+
   const [availablePlaces, setAvailablePlaces] = useState([]);
   const [bookingPlace, setBookingPlace] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -31,18 +32,18 @@ const QuickBook = () => {
   ];
 
   useEffect(() => {
-    fetchPlaces();
-  }, []);
+    fetchPlaces(); // Fetch only on mount
+  }, [fetchPlaces]);
 
   useEffect(() => {
-    if (places.length > 0) {
-      // Filter places with available slots and sort by proximity/rating
-      const available = places
-        .filter(place => place.availableSlots > 0)
-        .sort((a, b) => b.availableSlots - a.availableSlots)
-        .slice(0, 6); // Show top 6 options
-      setAvailablePlaces(available);
-    }
+    if (!places || places.length === 0) return;
+
+    const available = places
+      .filter(place => place.availableSlots > 0)
+      .sort((a, b) => b.availableSlots - a.availableSlots)
+      .slice(0, 6);
+
+    setAvailablePlaces(available);
   }, [places]);
 
   const calculateStartTime = () => {
@@ -60,7 +61,7 @@ const QuickBook = () => {
   };
 
   const calculateEndTime = (startTime) => {
-    const hours = parseInt(quickBookData.duration);
+    const hours = parseInt(quickBookData.duration, 10);
     return new Date(startTime.getTime() + hours * 60 * 60 * 1000);
   };
 
@@ -71,19 +72,14 @@ const QuickBook = () => {
     try {
       const startTime = calculateStartTime();
       const endTime = calculateEndTime(startTime);
-      const hours = parseInt(quickBookData.duration);
-      const totalAmount = hours * place.pricePerHour;
 
-      // Find an available slot (simplified - in real app, would show slot selection)
-      // Navigate to view slots page with pre-filled data
       const searchParams = new URLSearchParams({
         date: startTime.toISOString().split('T')[0],
         startTime: startTime.toTimeString().slice(0, 5),
         endTime: endTime.toTimeString().slice(0, 5)
       });
-      
-      navigate(`/view-slots/${place.id}?${searchParams.toString()}`);
 
+      navigate(`/view-slots/${place.id}?${searchParams.toString()}`);
     } catch (error) {
       console.error('Navigation failed:', error);
     } finally {
@@ -108,12 +104,11 @@ const QuickBook = () => {
           <p className="text-lg text-gray-600">Find and book parking in seconds</p>
         </div>
 
-        {/* Quick Options */}
+        {/* Duration Options */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">How long do you need parking?</h2>
-          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {durationOptions.map((option) => (
+            {durationOptions.map(option => (
               <button
                 key={option.value}
                 onClick={() => setQuickBookData(prev => ({ ...prev, duration: option.value }))}
@@ -132,9 +127,8 @@ const QuickBook = () => {
           </div>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-4">When do you want to start?</h3>
-          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {startTimeOptions.map((option) => (
+            {startTimeOptions.map(option => (
               <button
                 key={option.value}
                 onClick={() => setQuickBookData(prev => ({ ...prev, startTime: option.value }))}
@@ -153,7 +147,7 @@ const QuickBook = () => {
           </div>
         </div>
 
-        {/* Available Locations */}
+        {/* Available Places */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Available Now ({availablePlaces.length} locations)
@@ -165,13 +159,13 @@ const QuickBook = () => {
 
         {availablePlaces.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availablePlaces.map((place) => {
-              const hours = parseInt(quickBookData.duration);
+            {availablePlaces.map(place => {
+              const hours = parseInt(quickBookData.duration, 10);
               const totalCost = hours * place.pricePerHour;
               const isBooking = bookingPlace?.id === place.id;
 
               return (
-                <div key={place.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div key={place.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -206,7 +200,7 @@ const QuickBook = () => {
                       </div>
                     </div>
 
-                    {place.features && place.features.length > 0 && (
+                    {place.features?.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-4">
                         {place.features.slice(0, 2).map((feature, index) => (
                           <span
@@ -228,7 +222,9 @@ const QuickBook = () => {
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-2" />
                         <span>
-                          {quickBookData.startTime === 'now' ? 'Starting now' : `Starting ${startTimeOptions.find(opt => opt.value === quickBookData.startTime)?.label.toLowerCase()}`}
+                          {quickBookData.startTime === 'now'
+                            ? 'Starting now'
+                            : `Starting ${startTimeOptions.find(opt => opt.value === quickBookData.startTime)?.label.toLowerCase()}`}
                         </span>
                       </div>
                       <div className="flex items-center">
@@ -275,7 +271,7 @@ const QuickBook = () => {
           </div>
         )}
 
-        {/* Quick Tips */}
+        {/* Tips Section */}
         <div className="mt-12 bg-blue-50 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Quick Booking Tips</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-blue-800">
@@ -283,14 +279,18 @@ const QuickBook = () => {
               <Zap className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
               <div>
                 <div className="font-medium">Instant Confirmation</div>
-                <div className="text-sm text-blue-700">Your spot is reserved immediately after booking</div>
+                <div className="text-sm text-blue-700">
+                  Your spot is reserved immediately after booking
+                </div>
               </div>
             </div>
             <div className="flex items-start">
               <Clock className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
               <div>
                 <div className="font-medium">Flexible Timing</div>
-                <div className="text-sm text-blue-700">Extend your booking anytime through the app</div>
+                <div className="text-sm text-blue-700">
+                  Extend your booking anytime through the app
+                </div>
               </div>
             </div>
           </div>

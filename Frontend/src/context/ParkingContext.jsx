@@ -19,8 +19,9 @@ export const ParkingProvider = ({ children }) => {
 
   // Places CRUD
   const fetchPlaces = async () => {
+    if (loading) return;
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await parkingService.getPlaces();
       setPlaces(response.data);
     } catch (error) {
@@ -36,6 +37,7 @@ export const ParkingProvider = ({ children }) => {
       setPlaces(prev => [...prev, response.data]);
       return response;
     } catch (error) {
+      console.error('Error creating place:', error);
       throw error;
     }
   };
@@ -43,11 +45,12 @@ export const ParkingProvider = ({ children }) => {
   const updatePlace = async (id, placeData) => {
     try {
       const response = await parkingService.updatePlace(id, placeData);
-      setPlaces(prev => prev.map(place => 
+      setPlaces(prev => prev.map(place =>
         place.id === id ? response.data : place
       ));
       return response;
     } catch (error) {
+      console.error('Error updating place:', error);
       throw error;
     }
   };
@@ -57,14 +60,16 @@ export const ParkingProvider = ({ children }) => {
       await parkingService.deletePlace(id);
       setPlaces(prev => prev.filter(place => place.id !== id));
     } catch (error) {
+      console.error('Error deleting place:', error);
       throw error;
     }
   };
 
   // Slots CRUD
   const fetchSlots = async (placeId) => {
+    if (loading) return;
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await parkingService.getSlots(placeId);
       setSlots(response.data);
     } catch (error) {
@@ -80,6 +85,7 @@ export const ParkingProvider = ({ children }) => {
       setSlots(prev => [...prev, response.data]);
       return response;
     } catch (error) {
+      console.error('Error creating slot:', error);
       throw error;
     }
   };
@@ -87,11 +93,12 @@ export const ParkingProvider = ({ children }) => {
   const updateSlot = async (id, slotData) => {
     try {
       const response = await parkingService.updateSlot(id, slotData);
-      setSlots(prev => prev.map(slot => 
+      setSlots(prev => prev.map(slot =>
         slot.id === id ? response.data : slot
       ));
       return response;
     } catch (error) {
+      console.error('Error updating slot:', error);
       throw error;
     }
   };
@@ -101,14 +108,15 @@ export const ParkingProvider = ({ children }) => {
       await parkingService.deleteSlot(id);
       setSlots(prev => prev.filter(slot => slot.id !== id));
     } catch (error) {
+      console.error('Error deleting slot:', error);
       throw error;
     }
   };
 
   // Bookings
   const fetchBookings = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await parkingService.getBookings();
       setBookings(response.data);
     } catch (error) {
@@ -122,14 +130,16 @@ export const ParkingProvider = ({ children }) => {
     try {
       const response = await parkingService.createBooking(bookingData);
       setBookings(prev => [...prev, response.data]);
-      // Update slot availability
-      setSlots(prev => prev.map(slot => 
-        slot.id === bookingData.slotId 
+
+      setSlots(prev => prev.map(slot =>
+        slot.id === bookingData.slotId
           ? { ...slot, isAvailable: false }
           : slot
       ));
+
       return response;
     } catch (error) {
+      console.error('Error creating booking:', error);
       throw error;
     }
   };
@@ -137,20 +147,22 @@ export const ParkingProvider = ({ children }) => {
   const cancelBooking = async (id) => {
     try {
       const response = await parkingService.cancelBooking(id);
-      setBookings(prev => prev.map(booking => 
+      setBookings(prev => prev.map(booking =>
         booking.id === id ? response.data : booking
       ));
-      // Update slot availability
+
       const booking = bookings.find(b => b.id === id);
       if (booking) {
-        setSlots(prev => prev.map(slot => 
-          slot.id === booking.slotId 
+        setSlots(prev => prev.map(slot =>
+          slot.id === booking.slotId
             ? { ...slot, isAvailable: true }
             : slot
         ));
       }
+
       return response;
     } catch (error) {
+      console.error('Error cancelling booking:', error);
       throw error;
     }
   };
@@ -170,7 +182,7 @@ export const ParkingProvider = ({ children }) => {
     deleteSlot,
     fetchBookings,
     createBooking,
-    cancelBooking
+    cancelBooking,
   };
 
   return (

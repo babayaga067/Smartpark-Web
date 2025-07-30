@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Car, DollarSign, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Car, DollarSign, Calendar, Clock, CheckCircle, AlertCircle, ArrowLeft, MapPin } from 'lucide-react';
 import { useParking } from '../context/ParkingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
 
-const ParkingSlots = () => {
+const ViewSlots = () => {
   const { placeId } = useParams();
   const navigate = useNavigate();
-  const { places, slots, fetchSlots, createBooking, loading } = useParking();
+  const [searchParams] = useSearchParams();
+  const { places, slots, fetchPlaces, fetchSlots, createBooking, loading } = useParking();
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingData, setBookingData] = useState({
     startTime: '',
@@ -22,10 +23,28 @@ const ParkingSlots = () => {
   const place = places.find(p => p.id === placeId);
 
   useEffect(() => {
+    if (places.length === 0) {
+      fetchPlaces();
+    }
     if (placeId) {
       fetchSlots(placeId);
     }
-  }, [placeId]);
+    
+    // Get search parameters for pre-filling booking form
+    const date = searchParams.get('date');
+    const startTime = searchParams.get('startTime');
+    const endTime = searchParams.get('endTime');
+    
+    if (date && startTime && endTime) {
+      const startDateTime = `${date}T${startTime}`;
+      const endDateTime = `${date}T${endTime}`;
+      setBookingData(prev => ({
+        ...prev,
+        startTime: startDateTime,
+        endTime: endDateTime
+      }));
+    }
+  }, [placeId, searchParams, places.length]);
 
   useEffect(() => {
     if (selectedSlot && bookingData.startTime && bookingData.endTime) {
@@ -44,16 +63,18 @@ const ParkingSlots = () => {
     setShowBookingModal(true);
     setError('');
     
-    // Set default times (current time + 1 hour)
-    const now = new Date();
-    const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
-    const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
-    
-    setBookingData({
-      startTime: startTime.toISOString().slice(0, 16),
-      endTime: endTime.toISOString().slice(0, 16),
-      totalAmount: 0
-    });
+    // Set default times if not already set
+    if (!bookingData.startTime || !bookingData.endTime) {
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+      const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+      
+      setBookingData(prev => ({
+        ...prev,
+        startTime: startTime.toISOString().slice(0, 16),
+        endTime: endTime.toISOString().slice(0, 16)
+      }));
+    }
   };
 
   const handleBookingSubmit = async (e) => {
@@ -62,7 +83,7 @@ const ParkingSlots = () => {
     setError('');
 
     try {
-      const bookingData = {
+      const bookingPayload = {
         slotId: selectedSlot.id,
         placeId: placeId,
         placeName: place.name,
@@ -73,7 +94,7 @@ const ParkingSlots = () => {
       };
 
       // Navigate to payment page with booking data
-      navigate('/payment/new', { state: { bookingData } });
+      navigate('/payment/new', { state: { bookingData: bookingPayload } });
     } catch (err) {
       setError(err.message || 'Booking failed');
     } finally {
@@ -87,8 +108,10 @@ const ParkingSlots = () => {
         return 'bg-purple-100 border-purple-300 text-purple-800';
       case 'ev':
         return 'bg-green-100 border-green-300 text-green-800';
-      default:
+      case 'disabled':
         return 'bg-blue-100 border-blue-300 text-blue-800';
+      default:
+        return 'bg-gray-100 border-gray-300 text-gray-800';
     }
   };
 
@@ -98,6 +121,8 @@ const ParkingSlots = () => {
         return '⭐';
       case 'ev':
         return '⚡';
+      case 'disabled':
+        return '♿';
       default:
         return '🚗';
     }
@@ -131,13 +156,17 @@ const ParkingSlots = () => {
         <div className="mb-8">
           <button
             onClick={() => navigate('/parking-places')}
-            className="text-blue-600 hover:text-blue-800 mb-4"
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
           >
-            ← Back to parking places
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to parking places
           </button>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h1>
-          <p className="text-gray-600">{place.address}</p>
-          <div className="mt-4 flex items-center space-x-6">
+          <div className="flex items-center text-gray-600 mb-4">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{place.address}</span>
+          </div>
+          <div className="flex items-center space-x-6">
             <div className="flex items-center">
               <DollarSign className="h-5 w-5 text-gray-400 mr-1" />
               <span className="text-sm text-gray-600">${place.pricePerHour}/hour</span>
@@ -153,7 +182,7 @@ const ParkingSlots = () => {
 
         {/* Slots Grid */}
         {slots.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
             {slots.map((slot) => (
               <div
                 key={slot.id}
@@ -204,11 +233,11 @@ const ParkingSlots = () => {
         )}
 
         {/* Legend */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Slot Types</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded mr-3"></div>
+              <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded mr-3"></div>
               <span className="text-sm text-gray-600">Regular - Standard parking spot</span>
             </div>
             <div className="flex items-center">
@@ -218,6 +247,10 @@ const ParkingSlots = () => {
             <div className="flex items-center">
               <div className="w-4 h-4 bg-green-100 border border-green-300 rounded mr-3"></div>
               <span className="text-sm text-gray-600">EV - Electric vehicle charging</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded mr-3"></div>
+              <span className="text-sm text-gray-600">Disabled - Accessible parking</span>
             </div>
           </div>
         </div>
@@ -310,7 +343,7 @@ const ParkingSlots = () => {
                       Booking...
                     </div>
                   ) : (
-                    'Confirm Booking'
+                    'Proceed to Payment'
                   )}
                 </button>
               </div>
@@ -322,4 +355,4 @@ const ParkingSlots = () => {
   );
 };
 
-export default ParkingSlots;
+export default ViewSlots;
