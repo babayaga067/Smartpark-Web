@@ -1,54 +1,49 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
-
-
+import authService from '../services/authService';
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    let parsedUser = null;
+    if (token && userData && userData !== "undefined") {
+      try { parsedUser = JSON.parse(userData); } catch { parsedUser = null; }
     }
+    setUser(parsedUser);
     setLoading(false);
   }, []);
-
+  const registerUser = async (userData) => {
+  const data = await authService.register(userData);
+  setUser(data.user);
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  return data;
+};
   const login = async (email, password) => {
-    try {
-      const response = await authService.login(email, password);
-      setUser(response.user);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const data = await authService.login(email, password);
+    setUser(data.user);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data;
   };
 
   const register = async (userData) => {
-    try {
-      const response = await authService.register(userData);
-      setUser(response.user);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const data = await authService.register(userData);
+    setUser(data.user);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data;
   };
 
   const logout = () => {
@@ -57,48 +52,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const updateProfile = async (userData) => {
-    try {
-      const response = await authService.updateProfile(userData);
-      setUser(response.user);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const deleteAccount = async () => {
-    try {
-      await authService.deleteAccount();
-      logout();
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    updateProfile,
-    deleteAccount,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin'
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <AuthContext.Provider value={value}>
+  return loading ? (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  ) : (
+    <AuthContext.Provider value={{ user, login, register, logout, isAuthenticated: !!user, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

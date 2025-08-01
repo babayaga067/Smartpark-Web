@@ -6,7 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
 
 const ParkingPlaces = () => {
-  const { spots, fetchSpots, createBooking, loading } = useParking();
+  const { spots = [], fetchSpots, createBooking, loading } = useParking();
   const { user } = useAuth();
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -16,23 +16,20 @@ const ParkingPlaces = () => {
     fetchSpots();
   }, [fetchSpots]);
 
-  const handleBookSpot = async (spot) => {
+  const handleBookSpot = (spot) => {
     setSelectedSpot(spot);
     setShowBookingModal(true);
   };
 
   const confirmBooking = async () => {
     if (!selectedSpot) return;
-    
     setBookingLoading(true);
     try {
       await createBooking({ spotId: selectedSpot._id });
       setShowBookingModal(false);
       setSelectedSpot(null);
-      // Refresh spots to update availability
-      fetchSpots();
+      fetchSpots(); // Refresh
     } catch (error) {
-      console.error('Booking failed:', error);
       alert('Booking failed. Please try again.');
     } finally {
       setBookingLoading(false);

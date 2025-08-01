@@ -4,6 +4,8 @@ import { MapPin, Clock, Calendar, Zap, Star } from 'lucide-react';
 import { useParking } from '../context/ParkingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+
+
 const QuickBook = () => {
   const navigate = useNavigate();
   const { places, fetchPlaces, createBooking, loading } = useParking();

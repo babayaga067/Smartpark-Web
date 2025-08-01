@@ -1,13 +1,23 @@
+// src/pages/UserDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Car, Calendar, Clock, MapPin, CreditCard, TrendingUp } from 'lucide-react';
+import { Car, Calendar, MapPin, CreditCard, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useParking } from '../context/ParkingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const UserDashboard = () => {
   const { user } = useAuth();
-  const { spots, bookings, fetchSpots, fetchBookings, loading } = useParking();
+
+  // Use context with correct variable names!
+  const {
+    parkingPlaces,
+    bookings,
+    fetchParkingPlaces,
+    fetchUserBookings,
+    loading
+  } = useParking();
+
   const [stats, setStats] = useState({
     activeBookings: 0,
     totalBookings: 0,
@@ -15,30 +25,40 @@ const UserDashboard = () => {
     totalSpots: 0
   });
 
+  // Fetch on mount
   useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([fetchSpots(), fetchBookings()]);
-    };
-    loadData();
-  }, [fetchSpots, fetchBookings]);
-
-  useEffect(() => {
-    if (spots.length > 0 || bookings.length > 0) {
-      const activeBookings = bookings.length; // All bookings are active in our simple model
-      const totalBookings = bookings.length;
-      const availableSpots = spots.filter(spot => spot.status === 'available').length;
-      const totalSpots = spots.length;
-
-      setStats({
-        activeBookings,
-        totalBookings,
-        availableSpots,
-        totalSpots
-      });
+    async function loadData() {
+      await Promise.all([fetchParkingPlaces(), fetchUserBookings()]);
     }
-  }, [spots, bookings]);
+    loadData();
+    // Do not include fetchParkingPlaces/fetchUserBookings in deps to avoid unwanted infinite loops.
+    // eslint-disable-next-line
+  }, []);
 
-  const recentBookings = bookings.slice(0, 3);
+  // Defensive typing
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  const safeParkingPlaces = Array.isArray(parkingPlaces) ? parkingPlaces : [];
+
+  // Calculate statistics from data
+  useEffect(() => {
+    let availableSpots = 0;
+    let totalSpots = 0;
+    safeParkingPlaces.forEach(place => {
+      if (Array.isArray(place.slots)) {
+        totalSpots += place.slots.length;
+        availableSpots += place.slots.filter(slot => slot.isAvailable).length;
+      }
+    });
+
+    setStats({
+      activeBookings: safeBookings.length,
+      totalBookings: safeBookings.length,
+      availableSpots,
+      totalSpots
+    });
+  }, [safeParkingPlaces, safeBookings]);
+
+  const recentBookings = safeBookings.slice(0, 3);
 
   const quickActions = [
     {
@@ -64,7 +84,13 @@ const UserDashboard = () => {
     }
   ];
 
-  if (loading && bookings.length === 0) {
+  // Safe user name for greeting
+  const userName =
+    user?.firstName ||
+    user?.name ||
+    (user?.email ? user.email.split('@')[0] : "User");
+
+  if (loading && safeBookings.length === 0) {
     return <LoadingSpinner text="Loading dashboard..." />;
   }
 
@@ -74,7 +100,7 @@ const UserDashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.name}!
+            Welcome back, {userName}!
           </h1>
           <p className="text-gray-600 mt-2">Here's your parking overview</p>
         </div>
@@ -92,7 +118,6 @@ const UserDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="bg-green-500 rounded-lg p-3 mr-4">
@@ -104,7 +129,6 @@ const UserDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="bg-purple-500 rounded-lg p-3 mr-4">
@@ -116,7 +140,6 @@ const UserDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="bg-orange-500 rounded-lg p-3 mr-4">
@@ -155,14 +178,10 @@ const UserDashboard = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
-            <Link
-              to="/booking-history"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-            >
+            <Link to="/booking-history" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
               View All
             </Link>
           </div>
-
           {recentBookings.length > 0 ? (
             <div className="space-y-4">
               {recentBookings.map((booking) => (
@@ -180,7 +199,7 @@ const UserDashboard = () => {
                           {booking.spotId?.location || 'Unknown Spot'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Booked on {new Date(booking.timestamp).toLocaleDateString()}
+                          Booked on {booking.timestamp ? new Date(booking.timestamp).toLocaleDateString() : "Unknown"}
                         </p>
                       </div>
                     </div>
