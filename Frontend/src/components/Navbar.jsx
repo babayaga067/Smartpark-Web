@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Car, Menu, X, User, LogOut, Settings as SettingsIcon, BarChart3, Bell, CreditCard } from 'lucide-react';
+import { Car, Menu, X, User, LogOut, Settings as SettingsIcon, BarChart3, Bell, CreditCard, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -112,6 +112,16 @@ const Navbar = () => {
                       Manage Places
                     </Link>
                     <Link
+                      to="/admin/slots"
+                      className={`transition-colors ${
+                        isActive("/admin/slots")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Manage Slots
+                    </Link>
+                    <Link
                       to="/admin/users"
                       className={`transition-colors ${
                         isActive("/admin/users")
@@ -122,16 +132,6 @@ const Navbar = () => {
                       Users
                     </Link>
                     <Link
-                      to="/admin/reports"
-                      className={`transition-colors ${
-                        isActive("/admin/reports")
-                          ? "text-blue-600"
-                          : "text-gray-700 hover:text-blue-600"
-                      }`}
-                    >
-                      Reports
-                    </Link>
-                    <Link
                       to="/admin/bookings"
                       className={`transition-colors ${
                         isActive("/admin/bookings")
@@ -140,6 +140,16 @@ const Navbar = () => {
                       }`}
                     >
                       Manage Bookings
+                    </Link>
+                    <Link
+                      to="/admin/reports"
+                      className={`transition-colors ${
+                        isActive("/admin/reports")
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
+                    >
+                      Reports
                     </Link>
                   </>
                 )}
@@ -180,6 +190,27 @@ const Navbar = () => {
                         <SettingsIcon className="h-4 w-4 mr-2" />
                         Settings
                       </Link>
+                      {isAdmin && (
+                        <>
+                          <div className="border-t border-gray-200 my-1"></div>
+                          <Link
+                            to="/admin/places/create"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Place
+                          </Link>
+                          <Link
+                            to="/admin/slots/create"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Slot
+                          </Link>
+                        </>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -268,6 +299,13 @@ const Navbar = () => {
                       Parking Places
                     </Link>
                     <Link
+                      to="/quick-book"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Quick Book
+                    </Link>
+                    <Link
                       to="/booking-history"
                       onClick={() => setIsOpen(false)}
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
@@ -294,18 +332,18 @@ const Navbar = () => {
                       Manage Places
                     </Link>
                     <Link
+                      to="/admin/slots"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Manage Slots
+                    </Link>
+                    <Link
                       to="/admin/users"
                       onClick={() => setIsOpen(false)}
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
                     >
                       Manage Users
-                    </Link>
-                    <Link
-                      to="/admin/reports"
-                      onClick={() => setIsOpen(false)}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                    >
-                      Reports
                     </Link>
                     <Link
                       to="/admin/bookings"
@@ -314,9 +352,32 @@ const Navbar = () => {
                     >
                       Manage Bookings
                     </Link>
+                    <Link
+                      to="/admin/reports"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Reports
+                    </Link>
+                    <div className="border-t border-gray-200 my-2"></div>
+                    <Link
+                      to="/admin/places/create"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Add New Place
+                    </Link>
+                    <Link
+                      to="/admin/slots/create"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Add New Slot
+                    </Link>
                   </>
                 )}
 
+                <div className="border-t border-gray-200 my-2"></div>
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}

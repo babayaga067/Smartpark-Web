@@ -28,13 +28,16 @@ import Contact from './pages/Contact';
 import Help from './pages/Help';
 import Pricing from './pages/Pricing';
 import NotFound from './pages/NotFound';
+
+// Admin Pages
 import ManagePlaces from './pages/admin/ManagePlaces';
 import ManageSlots from './pages/admin/ManageSlots';
+import CreatePlace from './pages/admin/CreatePlace';
+import CreateSlot from './pages/admin/CreateSlot';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageBookings from './pages/admin/ManageBookings';
 import Reports from './pages/admin/Reports';
-import CreatePlace from './pages/admin/CreatePlace';
-import CreateSlot from './pages/admin/CreateSlot';
+
 import './index.css';
 
 function App() {
@@ -104,10 +107,10 @@ function App() {
             <Route path="/admin/places/create" element={
               <ProtectedRoute adminOnly><CreatePlace /></ProtectedRoute>
             } />
-            <Route path="/admin/slots/:placeId" element={
+            <Route path="/admin/slots" element={
               <ProtectedRoute adminOnly><ManageSlots /></ProtectedRoute>
             } />
-            <Route path="/admin/slots/:placeId/create" element={
+            <Route path="/admin/slots/create" element={
               <ProtectedRoute adminOnly><CreateSlot /></ProtectedRoute>
             } />
             <Route path="/admin/users" element={

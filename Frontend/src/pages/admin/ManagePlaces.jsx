@@ -1,116 +1,73 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, MapPin, DollarSign, Car } from 'lucide-react';
+import { Car, Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { useParking } from '../../context/ParkingContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Modal from '../../components/Modal';
 
-const ManagePlaces = () => {
-  const { places, fetchPlaces, createPlace, updatePlace, deletePlace, loading } = useParking();
-  const [searchTerm, setSearchTerm] = useState('');
+const ManageSpots = () => {
+  const { spots, fetchSpots, createSpot, updateSpot, deleteSpot, loading } = useParking();
   const [showModal, setShowModal] = useState(false);
-  const [editingPlace, setEditingPlace] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    description: '',
-    pricePerHour: '',
-    features: []
-  });
-  const [formLoading, setFormLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const availableFeatures = ['Covered', 'Security', 'CCTV', 'Valet', 'Car Wash', 'EV Charging', '24/7 Access'];
+  const [editingSpot, setEditingSpot] = useState(null);
+  const [formData, setFormData] = useState({ location: '' });
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
-    fetchPlaces();
-  }, []);
+    fetchSpots();
+  }, [fetchSpots]);
 
-  const filteredPlaces = places.filter(place =>
-    place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    place.address.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleAddPlace = () => {
-    setEditingPlace(null);
-    setFormData({
-      name: '',
-      address: '',
-      description: '',
-      pricePerHour: '',
-      features: []
-    });
-    setError('');
+  const handleAddSpot = () => {
+    setEditingSpot(null);
+    setFormData({ location: '' });
     setShowModal(true);
   };
 
-  const handleEditPlace = (place) => {
-    setEditingPlace(place);
-    setFormData({
-      name: place.name,
-      address: place.address,
-      description: place.description || '',
-      pricePerHour: place.pricePerHour.toString(),
-      features: place.features || []
-    });
-    setError('');
+  const handleEditSpot = (spot) => {
+    setEditingSpot(spot);
+    setFormData({ location: spot.location });
     setShowModal(true);
   };
 
-  const handleDeletePlace = async (place) => {
-    if (!window.confirm(`Are you sure you want to delete "${place.name}"? This will also delete all associated slots.`)) {
-      return;
-    }
-
-    try {
-      await deletePlace(place.id);
-    } catch (error) {
-      alert('Failed to delete place: ' + error.message);
-    }
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) setError('');
-  };
-
-  const handleFeatureToggle = (feature) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.includes(feature)
-        ? prev.features.filter(f => f !== feature)
-        : [...prev.features, feature]
-    }));
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setFormLoading(true);
-    setError('');
-
-    try {
-      const placeData = {
-        ...formData,
-        pricePerHour: parseFloat(formData.pricePerHour)
-      };
-
-      if (editingPlace) {
-        await updatePlace(editingPlace.id, placeData);
-      } else {
-        await createPlace(placeData);
+  const handleDeleteSpot = async (spotId) => {
+    if (window.confirm('Are you sure you want to delete this spot?')) {
+      try {
+        await deleteSpot(spotId);
+      } catch (error) {
+        console.error('Error deleting spot:', error);
+        alert('Failed to delete spot. Please try again.');
       }
-
-      setShowModal(false);
-    } catch (err) {
-      setError(err.message || 'Failed to save place');
-    } finally {
-      setFormLoading(false);
     }
   };
 
-  if (loading && places.length === 0) {
-    return <LoadingSpinner text="Loading parking places..." />;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setModalLoading(true);
+
+    try {
+      if (editingSpot) {
+        await updateSpot(editingSpot._id, formData);
+      } else {
+        await createSpot(formData);
+      }
+      setShowModal(false);
+      setFormData({ location: '' });
+      setEditingSpot(null);
+    } catch (error) {
+      console.error('Error saving spot:', error);
+      alert('Failed to save spot. Please try again.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  if (loading) {
+    return <LoadingSpinner text="Loading spots..." />;
   }
 
   return (
@@ -120,255 +77,193 @@ const ManagePlaces = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manage Parking Places</h1>
-              <p className="text-gray-600 mt-2">Add, edit, and manage parking locations</p>
+              <h1 className="text-3xl font-bold text-gray-900">Manage Parking Spots</h1>
+              <p className="text-gray-600 mt-2">Add, edit, and manage parking spots</p>
             </div>
             <button
-              onClick={handleAddPlace}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+              onClick={handleAddSpot}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors duration-200"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Place
+              <Plus className="h-5 w-5 mr-2" />
+              Add Spot
             </button>
-            <Link
-              to="/admin/places/create"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Place
-            </Link>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="bg-blue-500 rounded-lg p-3 mr-4">
+                <Car className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Spots</p>
+                <p className="text-2xl font-bold text-gray-900">{spots.length}</p>
+              </div>
+            </div>
           </div>
 
-          {/* Search */}
-          <div className="mt-6 max-w-md">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="bg-green-500 rounded-lg p-3 mr-4">
+                <MapPin className="h-6 w-6 text-white" />
               </div>
-              <input
-                type="text"
-                placeholder="Search places..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div>
+                <p className="text-sm text-gray-600">Available</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {spots.filter(spot => spot.status === 'available').length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="bg-red-500 rounded-lg p-3 mr-4">
+                <Car className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Occupied</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {spots.filter(spot => spot.status === 'booked').length}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Places Grid */}
-        {filteredPlaces.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPlaces.map((place) => (
-              <div key={place.id} className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{place.name}</h3>
-                  <div className="flex space-x-2 ml-2">
-                    <button
-                      onClick={() => handleEditPlace(place)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePlace(place)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-sm line-clamp-2">{place.address}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    <span className="text-sm">${place.pricePerHour}/hour</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Car className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{place.availableSlots}/{place.totalSlots} available</span>
-                  </div>
-                </div>
-
-                {place.description && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{place.description}</p>
-                )}
-
-                {place.features && place.features.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {place.features.slice(0, 3).map((feature, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                    {place.features.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                        +{place.features.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => window.location.href = `/admin/slots/${place.id}`}
-                    className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                  >
-                    Manage Slots ({place.totalSlots})
-                  </button>
-                </div>
-              </div>
-            ))}
+        {/* Spots List */}
+        <div className="bg-white rounded-lg shadow-md">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">All Parking Spots</h2>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No parking places found</h3>
-            <p className="text-gray-500 mb-4">
-              {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first parking place'}
-            </p>
-            {!searchTerm && (
-              <button
-                onClick={handleAddPlace}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Add First Place
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Add/Edit Place Modal */}
-        <Modal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          title={editingPlace ? 'Edit Parking Place' : 'Add New Parking Place'}
-          size="lg"
-        >
-          <form onSubmit={handleFormSubmit}>
-            {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-                <span className="text-sm text-red-700">{error}</span>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Place Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter place name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address *
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  required
-                  value={formData.address}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter full address"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleFormChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter description (optional)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price per Hour ($) *
-                </label>
-                <input
-                  type="number"
-                  name="pricePerHour"
-                  required
-                  min="0"
-                  step="0.01"
-                  value={formData.pricePerHour}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Features
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {availableFeatures.map((feature) => (
-                    <label key={feature} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.features.includes(feature)}
-                        onChange={() => handleFeatureToggle(feature)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{feature}</span>
-                    </label>
+          
+          {spots.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Spot ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {spots.map((spot) => (
+                    <tr key={spot._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {spot._id.slice(-6)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {spot.location}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          spot.status === 'available' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {spot.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(spot.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditSpot(spot)}
+                            className="text-blue-600 hover:text-blue-900 transition-colors duration-200"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSpot(spot._id)}
+                            className="text-red-600 hover:text-red-900 transition-colors duration-200"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
-                </div>
-              </div>
+                </tbody>
+              </table>
             </div>
-
-            <div className="flex space-x-3 mt-6">
+          ) : (
+            <div className="text-center py-12">
+              <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Spots Yet</h3>
+              <p className="text-gray-500 mb-4">Get started by adding your first parking spot.</p>
               <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={handleAddSpot}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center mx-auto transition-colors duration-200"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={formLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {formLoading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {editingPlace ? 'Updating...' : 'Creating...'}
-                  </div>
-                ) : (
-                  editingPlace ? 'Update Place' : 'Create Place'
-                )}
+                <Plus className="h-5 w-5 mr-2" />
+                Add First Spot
               </button>
             </div>
-          </form>
-        </Modal>
+          )}
+        </div>
       </div>
+
+      {/* Add/Edit Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingSpot ? 'Edit Parking Spot' : 'Add New Parking Spot'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+              Location
+            </label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter spot location (e.g., A1, B2, etc.)"
+            />
+          </div>
+          
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              disabled={modalLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+              disabled={modalLoading}
+            >
+              {modalLoading ? 'Saving...' : (editingSpot ? 'Update Spot' : 'Add Spot')}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
 
-export default ManagePlaces;
+export default ManageSpots;

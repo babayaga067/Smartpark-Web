@@ -7,43 +7,36 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const UserDashboard = () => {
   const { user } = useAuth();
-  const { bookings, fetchBookings, loading } = useParking();
+  const { spots, bookings, fetchSpots, fetchBookings, loading } = useParking();
   const [stats, setStats] = useState({
     activeBookings: 0,
     totalBookings: 0,
-    totalSpent: 0,
-    hoursParked: 0
+    availableSpots: 0,
+    totalSpots: 0
   });
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    const loadData = async () => {
+      await Promise.all([fetchSpots(), fetchBookings()]);
+    };
+    loadData();
+  }, [fetchSpots, fetchBookings]);
 
   useEffect(() => {
-    if (bookings.length > 0) {
-      const activeBookings = bookings.filter(b => b.status === 'active').length;
+    if (spots.length > 0 || bookings.length > 0) {
+      const activeBookings = bookings.length; // All bookings are active in our simple model
       const totalBookings = bookings.length;
-      const totalSpent = bookings
-        .filter(b => b.paymentStatus === 'paid')
-        .reduce((sum, b) => sum + b.totalAmount, 0);
-      
-      // Calculate total hours (simplified calculation)
-      const hoursParked = bookings
-        .filter(b => b.status === 'completed')
-        .reduce((sum, b) => {
-          const start = new Date(b.startTime);
-          const end = new Date(b.endTime);
-          return sum + Math.ceil((end - start) / (1000 * 60 * 60));
-        }, 0);
+      const availableSpots = spots.filter(spot => spot.status === 'available').length;
+      const totalSpots = spots.length;
 
       setStats({
         activeBookings,
         totalBookings,
-        totalSpent,
-        hoursParked
+        availableSpots,
+        totalSpots
       });
     }
-  }, [bookings]);
+  }, [spots, bookings]);
 
   const recentBookings = bookings.slice(0, 3);
 
@@ -115,11 +108,11 @@ const UserDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="bg-purple-500 rounded-lg p-3 mr-4">
-                <CreditCard className="h-6 w-6 text-white" />
+                <MapPin className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Spent</p>
-                <p className="text-2xl font-bold text-gray-900">${stats.totalSpent.toFixed(2)}</p>
+                <p className="text-sm text-gray-600">Available Spots</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.availableSpots}</p>
               </div>
             </div>
           </div>
@@ -127,88 +120,117 @@ const UserDashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="bg-orange-500 rounded-lg p-3 mr-4">
-                <Clock className="h-6 w-6 text-white" />
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Hours Parked</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.hoursParked}</p>
+                <p className="text-sm text-gray-600">Total Spots</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalSpots}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Bookings */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
-              <Link
-                to="/booking-history"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                View All
-              </Link>
-            </div>
-            
-            {recentBookings.length > 0 ? (
-              <div className="space-y-4">
-                {recentBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className={`w-3 h-3 rounded-full mr-3 ${
-                        booking.status === 'active' ? 'bg-green-500' :
-                        booking.status === 'completed' ? 'bg-blue-500' : 'bg-red-500'
-                      }`}></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{booking.placeName}</p>
-                        <p className="text-xs text-gray-500">Slot {booking.slotNumber}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">${booking.totalAmount}</p>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        booking.status === 'active' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {quickActions.map((action, index) => (
+            <Link
+              key={index}
+              to={action.link}
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200"
+            >
+              <div className="flex items-center">
+                <div className={`${action.color} rounded-lg p-3 mr-4`}>
+                  <action.icon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{action.title}</h3>
+                  <p className="text-sm text-gray-600">{action.description}</p>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No bookings yet</p>
-                <Link
-                  to="/parking-places"
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  Make your first booking
-                </Link>
-              </div>
-            )}
+            </Link>
+          ))}
+        </div>
+
+        {/* Recent Bookings */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
+            <Link
+              to="/booking-history"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              View All
+            </Link>
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          {recentBookings.length > 0 ? (
             <div className="space-y-4">
-              {quickActions.map((action, index) => (
-                <Link
-                  key={index}
-                  to={action.link}
-                  className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              {recentBookings.map((booking) => (
+                <div
+                  key={booking._id}
+                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <div className={`${action.color} rounded-lg p-3 mr-4`}>
-                    <action.icon className="h-6 w-6 text-white" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="bg-blue-100 rounded-lg p-2 mr-4">
+                        <Car className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {booking.spotId?.location || 'Unknown Spot'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Booked on {new Date(booking.timestamp).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                      <Link
+                        to={`/booking-details/${booking._id}`}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{action.title}</p>
-                    <p className="text-sm text-gray-600">{action.description}</p>
-                  </div>
-                </Link>
+                </div>
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">No bookings yet</p>
+              <Link
+                to="/parking-places"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <MapPin className="h-4 w-4 mr-2" />
+                Find Parking
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Book Section */}
+        <div className="mt-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold mb-2">Need Parking Fast?</h3>
+              <p className="text-blue-100 mb-4">
+                Book your parking spot in seconds with our quick booking feature.
+              </p>
+              <Link
+                to="/quick-book"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50"
+              >
+                Quick Book Now
+              </Link>
+            </div>
+            <div className="hidden md:block">
+              <Car className="h-16 w-16 text-blue-200" />
             </div>
           </div>
         </div>
